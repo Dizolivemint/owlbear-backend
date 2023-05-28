@@ -1,0 +1,47 @@
+app: owlbear
+org: dizolivemint
+service: generator
+frameworkVersion: '3'
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  memorySize: 128
+  profile: serverless
+  deploymentMethod: direct
+
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-2'}
+
+apiGateway:
+  apiKeys:
+    - ${self:provider.stage}-apikey
+
+environment:
+  SUPABASE_SECRET_KEY: ${param:supabase_secret_key}
+  SUPABASE_URL: ${param:supabase_url}
+
+
+logs:
+  restApi: true
+
+custom:
+  serverless-offline:
+    port: 3003
+
+functions:
+  api:
+    handler: /lambda/postRequest.handler
+    events:
+      - httpApi:
+          path: /
+          method: post
+          private: true
+          cors: true
+          request:
+            schemas:
+              application/json: ${file(models/post-request-model.json)}

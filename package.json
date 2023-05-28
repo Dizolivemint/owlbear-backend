@@ -1,0 +1,19 @@
+{
+  "name": "owlbear-serverless",
+  "version": "1.0.0",
+  "description": "serverless functions for owlbear online",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Miles Exner",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.23.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.115",
+    "serverless-esbuild": "^1.45.0",
+    "serverless-offline": "^12.0.4"
+  }
+}

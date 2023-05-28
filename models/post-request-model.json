@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "group",
+  "type": "object",
+  "properties": {
+    "size": {
+      "type": "string"
+    },
+    "species": {
+      "type": "string"
+    },
+    "challengeRating": {
+      "type": "string"
+    },
+    "isLegendary": {
+      "type": "boolean"
+    },
+    "user": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
