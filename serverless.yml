@@ -17,31 +17,40 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-2'}
 
-apiGateway:
-  apiKeys:
-    - ${self:provider.stage}-apikey
+  apiGateway:
+    apiKeys:
+      - ${self:provider.stage}-apikey
 
-environment:
-  SUPABASE_SECRET_KEY: ${param:supabase_secret_key}
-  SUPABASE_URL: ${param:supabase_url}
+  environment:
+    SUPABASE_SECRET_KEY: ${param:supabase_secret_key}
+    SUPABASE_URL: ${param:supabase_url}
+    CHATGPT_API_KEY: ${param:chatgpt_api_key}
+    STABLEDIFFUSION_API_KEY: ${param:stablediffusion_api_key}
+    STABLEDIFFUSION_API_ENDPOINT: ${param:stablediffusion_api_endpoint}
 
 
-logs:
-  restApi: true
+  logs:
+    restApi: true
 
 custom:
   serverless-offline:
     port: 3003
 
 functions:
-  api:
-    handler: /lambda/postRequest.handler
+  GenerateCharacter:
+    handler: src/lambda/generateCharacter.handler
     events:
-      - httpApi:
-          path: /
-          method: post
-          private: true
-          cors: true
-          request:
-            schemas:
-              application/json: ${file(models/post-request-model.json)}
+      - schedule: rate(2 minutes)
+    timeout: 120
+
+  # postRequest:
+  #   handler: src/lambda/postRequest.handler
+  #   events:
+  #     - http:
+  #         path: /
+  #         method: post
+  #         private: true
+  #         cors: true
+  #         request:
+  #           schemas:
+  #             application/json: ${file(models/post-request-model.json)}
