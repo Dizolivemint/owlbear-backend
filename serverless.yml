@@ -40,8 +40,8 @@ functions:
   GenerateCharacter:
     handler: src/lambda/generateCharacter.handler
     events:
-      - schedule: rate(10 minutes)
-    timeout: 120
+      - schedule: rate(30 minutes)
+    timeout: 480
 
   # postRequest:
   #   handler: src/lambda/postRequest.handler
