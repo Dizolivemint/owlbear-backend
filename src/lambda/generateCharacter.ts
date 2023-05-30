@@ -38,7 +38,6 @@ export const handler = async () => {
     const character: Database['public']['Tables']['characters']['Insert'] = {
       character_data: characterJson,
       image_filename: characterResponse.imageUrl,
-      image_fetch_url: characterResponse.imageFetchUrl,
       user_id: user
     }
     

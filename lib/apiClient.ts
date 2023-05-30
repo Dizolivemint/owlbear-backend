@@ -103,7 +103,14 @@ export class ApiClient {
     const jsonStartIndex = choiceText.indexOf('{');
     const jsonEndIndex = choiceText.lastIndexOf('}') + 1;
     const trimmedJson = choiceText.slice(jsonStartIndex, jsonEndIndex);
-    const parsedData = JSON.parse(trimmedJson);
+    let parsedData
+    try {
+      parsedData = JSON.parse(trimmedJson);
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+      this.generateCharacter(request)
+      return
+    }
 
     // Assign the parsed values to the character object
     character.attributes = getPropInsensitive(parsedData, 'attributes');
@@ -143,6 +150,10 @@ export class ApiClient {
     // Create a Stable Diffusion prompt using the character's name and appearance
     const chatGptStableDiffusionPrompt = `turn the appearance at the end into boorus tags separated by commas in a one line prompt. include these tags in the beginning of the prompt 'High detail RAW color (Digital painting:1.2), of ${character.name}'. at the end of the prompt, add the tags ', best quality, trending on artstation, unreal engine' appearance: ${character.appearance}`
 
+    // Wait for next request
+    const delay = 15000;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    
     // Get the Stable Diffusion prompt
     const stableDiffusionPromptResponse = await this.requestGPT(chatGptStableDiffusionPrompt);
     if (stableDiffusionPromptResponse.error) {
@@ -156,12 +167,11 @@ export class ApiClient {
     if (!images) {
       throw new Error('Image url is empty or undefined');
     }
-    const imageUrl = images[0];
-    const imageFetchUrl = images[1] || '';
+    const imageUrl = typeof images === 'string' ? images : images[0];
     console.log('imageUrl', imageUrl);
           
 
-    return { character, imageUrl, imageFetchUrl };
+    return { character, imageUrl };
   }
 
   async createImage(prompt: string): Promise<string[] | string> {
@@ -204,7 +214,7 @@ export class ApiClient {
       "key": this.stablediffusionApiKey,
       "model_id": "rpg-v4",
       prompt,
-      negative_prompt: "((cartoon)), (((nudity))), (painting), (doll), ((drawing)), ((out of focus body)), ((out of focus face)), ((((ugly)))), (((duplicate))), ((morbid)), ((mutilated)), [out of frame], (extra fingers), (mutated hands), ((poorly drawn hands)), ((poorly drawn face)), (((mutation))), (((deformed))), ((ugly)), blurry, ((bad anatomy)), (((bad proportions))), ((extra limbs)), cloned face, (((disfigured))), out of frame, ugly, extra limbs, (bad anatomy), gross proportions, (malformed limbs), ((missing arms)), ((missing legs)), (((extra arms))), (((extra legs))), mutated hands, (fused fingers), (too many fingers), (((long neck))), ((cross-eyed)), cross eyed, ((big ears)), (text), (((watermark))), (watermarking), (((nsfw)))",
+      negative_prompt: "((cartoon)), (((nudity))), (painting), (doll), ((drawing)), ((out of focus body)), ((out of focus face)) (((duplicate))), (out of frame), (extra fingers), (mutated hands), ((poorly drawn hands)), ((poorly drawn face)), (fused fingers), (too many fingers), ((cross-eyed)), ((big ears)), (text), (((watermark))), (watermarking), (((nsfw)))",
       "width": "512",
       "height": "512",
       "samples": "1",
@@ -252,11 +262,21 @@ export class ApiClient {
           const delay = (eta * 1.2) * 1000;
           await new Promise((resolve) => setTimeout(resolve, delay));
           
-          const image = await this.fetchImage(imageFetchUrl);
+          let image = await this.fetchImage(imageFetchUrl);
           console.log('image', image);
           
           if (!image) {
-            throw new Error('Image URL is empty or undefined');
+            let retries = 0;
+            while (!image && retries < 5) {
+              retries++;
+              console.log('Retrying fetching image...');
+              const delay = (eta) * 1000;
+              await new Promise((resolve) => setTimeout(resolve, delay));
+              image = await this.fetchImage(imageFetchUrl);  
+            }
+          }
+          if (!image) {
+            throw new Error('Image url is empty or undefined');
           }
           
           return image;
