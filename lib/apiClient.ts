@@ -148,12 +148,12 @@ export class ApiClient {
     }
 
     // Create a Stable Diffusion prompt using the character's name and appearance
-    const chatGptStableDiffusionPrompt = `turn the appearance at the end into boorus tags separated by commas in a one line prompt. include these tags in the beginning of the prompt 'High detail RAW color (Digital painting:1.2), of ${character.name}'. at the end of the prompt, add the tags ', best quality, trending on artstation, unreal engine' appearance: ${character.appearance}`
+    const chatGptStableDiffusionPrompt = `Turn the appearance at the end into boorus tags separated by commas in a one line prompt. Include these tags in the beginning of the prompt 'A (full body:1.3) shot at 8k resolution, splash art, fantastic comic book style, photorealistic, anatomical photorealistic digital painting portrait'. at the end of the prompt, add the tags ', (insanely detailed, bloom:1.5), (highest quality, Alessandro Casagrande, Greg Rutkowski, Sally Mann, concept art, 4k)'. Appearance: ${character.appearance}`
 
     // Wait for next request
     const delay = 15000;
     await new Promise((resolve) => setTimeout(resolve, delay));
-    
+
     // Get the Stable Diffusion prompt
     const stableDiffusionPromptResponse = await this.requestGPT(chatGptStableDiffusionPrompt);
     if (stableDiffusionPromptResponse.error) {
@@ -169,7 +169,10 @@ export class ApiClient {
     }
     const imageUrl = typeof images === 'string' ? images : images[0];
     console.log('imageUrl', imageUrl);
-          
+    
+    if (!imageUrl) {
+      throw new Error('Image url is empty or undefined');
+    }
 
     return { character, imageUrl };
   }
@@ -214,15 +217,15 @@ export class ApiClient {
       "key": this.stablediffusionApiKey,
       "model_id": "rpg-v4",
       prompt,
-      negative_prompt: "((cartoon)), (((nudity))), (painting), (doll), ((drawing)), ((out of focus body)), ((out of focus face)) (((duplicate))), (out of frame), (extra fingers), (mutated hands), ((poorly drawn hands)), ((poorly drawn face)), (fused fingers), (too many fingers), ((cross-eyed)), ((big ears)), (text), (((watermark))), (watermarking), (((nsfw)))",
+      negative_prompt: "(low quality, worst quality:1.4), lowres, bad hands out of frame, extra fingers, mutated hands, (poorly drawn hands:1.21), (poorly drawn face:1.21), blurry, cloned face, glitchy, out of frame, (text), (((watermark))), (watermarking), (((nudity))), (((nipples))), (((nsfw)))",
       "width": "512",
-      "height": "512",
+      "height": "768",
       "samples": "1",
-      "num_inference_steps": "30",
+      "num_inference_steps": "31",
       "safety_checker": "no",
       "enhance_prompt": "no",
       "seed": null,
-      "guidance_scale": 7.5,
+      "guidance_scale": 6,
       "multi_lingual": "no",
       "panorama": "no",
       "self_attention": "no",

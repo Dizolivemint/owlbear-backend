@@ -27,6 +27,10 @@ provider:
     CHATGPT_API_KEY: ${param:chatgpt_api_key}
     STABLEDIFFUSION_API_KEY: ${param:stablediffusion_api_key}
     STABLEDIFFUSION_API_ENDPOINT: ${param:stablediffusion_api_endpoint}
+    SENDGRID_FROM_EMAIL: ${param:sendgrid_from_email}
+    SENDGRID_API_KEY: ${param:sendgrid_api_key}
+    ONESIGNAL_REST_API_KEY: ${param:onesignal_rest_api_key}
+    ONESIGNAL_APP_ID: ${param:onesignal_app_id}
 
 
   logs:
@@ -39,8 +43,9 @@ custom:
 functions:
   GenerateCharacter:
     handler: src/lambda/generateCharacter.handler
+    reservedConcurrency: 1
     events:
-      - schedule: rate(30 minutes)
+      - schedule: rate(1 minute)
     timeout: 480
 
   # postRequest:
